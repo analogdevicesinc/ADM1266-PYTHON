@@ -965,18 +965,18 @@ def Rail_Parse(RailData_length, RailData_pointer):
         (temp, next_pointer) = VLQ_Decode(next_pointer)
         PDIO_GPIO_Polarity = temp & 0x01
 
-        if PDIO_GPIO_Type == 0:
+        #if PDIO_GPIO_Type == 0:
 
-            if VX_Type == 0:
-                VH_Data[VX_dev_id][VX_Num][0] = Rail_Name
-                VH_Data[VX_dev_id][VX_Num][1] = PDIO_GPIO_Num
-                VH_Data[VX_dev_id][VX_Num][2] = PDIO_GPIO_dev_id
-                VH_Data[VX_dev_id][VX_Num][3] = PDIO_GPIO_Polarity
-            else:
-                VP_Data[VX_dev_id][VX_Num][0] = Rail_Name
-                VP_Data[VX_dev_id][VX_Num][1] = PDIO_GPIO_Num
-                VP_Data[VX_dev_id][VX_Num][2] = PDIO_GPIO_dev_id
-                VP_Data[VX_dev_id][VX_Num][3] = PDIO_GPIO_Polarity
+        if VX_Type == 0:
+            VH_Data[VX_dev_id][VX_Num][0] = Rail_Name
+            VH_Data[VX_dev_id][VX_Num][1] = PDIO_GPIO_Num
+            VH_Data[VX_dev_id][VX_Num][2] = PDIO_GPIO_dev_id
+            VH_Data[VX_dev_id][VX_Num][3] = PDIO_GPIO_Polarity
+        else:
+            VP_Data[VX_dev_id][VX_Num][0] = Rail_Name
+            VP_Data[VX_dev_id][VX_Num][1] = PDIO_GPIO_Num
+            VP_Data[VX_dev_id][VX_Num][2] = PDIO_GPIO_dev_id
+            VP_Data[VX_dev_id][VX_Num][3] = PDIO_GPIO_Polarity
 
 
 def Signal_Parse(SignalData_length, SignalData_pointer):
