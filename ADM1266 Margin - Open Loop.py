@@ -1,4 +1,4 @@
-# Copyright (c) 2017-2021 Analog Devices Inc.
+# Copyright (c) 2017-2023 Analog Devices Inc.
 # All rights reserved.
 # www.analog.com
 
@@ -28,7 +28,12 @@ if __name__ == '__main__':
     PMBus_I2C.Open_Aardvark()
 
     # PMBus address of all ADM1266 in this design. e.g: [0x40, 0x42]
-    ADM1266_Lib.ADM1266_Address = [0x40, 0x42]
+    if len(sys.argv) > 1:
+        #All trailing arguments are treated as addresses in hex
+        ADM1266_Lib.ADM1266_Address = [int(a,16) for a in sys.argv[1:]]
+    else:
+        #Default to [0x40, 0x42] 
+        ADM1266_Lib.ADM1266_Address = [0x40, 0x42]
 
     # Check if all the devices listed in ADM1266_Lib.ADM1266_Address above is present. 
     # If all the devices are not present the function will throw an exception and will not procced with the remaining code.

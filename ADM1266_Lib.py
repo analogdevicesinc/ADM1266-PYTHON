@@ -1,4 +1,4 @@
-# Copyright (c) 2017-2021 Analog Devices Inc.
+# Copyright (c) 2017-2023 Analog Devices Inc.
 # All rights reserved.
 # www.analog.com
 
@@ -1388,7 +1388,7 @@ def System_Parse_Offline(hex_file_path, system_data):
             data_len = int(line[1:3], 16)
             cmd = int(line[3:7], 16)
             data = [] if data_len == 0 else array('B', codecs.decode((line[9:9 + data_len * 2]), "hex_codec")).tolist()
-            if cmd is 0xD7:
+            if cmd == 0xD7:
                 del data[1:3]
                 system_data.append(data)
 
