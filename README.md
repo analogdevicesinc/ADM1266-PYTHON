@@ -32,6 +32,16 @@ If a different i2c dongle is used, the user need to include the APIs for that sp
 Scripts such as [ADM1266 Load Firmware and Configuration.py](ADM1266_Load_Firmware_and_Configuration.py), [ADM1266 Blackbox Read.py](ADM1266_Blackbox_Read.py), [ADM1266 Telemetry Read.py](ADM1266_Telemetry_Read.py), etc are user interfacing scripts which call required functions in the [ADM1266_Lib.py](ADM1266_Lib.py) to perform a specific task.
 Minor modifications are required by the user to update the script with their system specific information. The required modifications are described in [Modifications Applicable to All User Interfacing Scripts](#modifications-applicable-to-all-user-interfacing-scripts) and [Modifications Applicable to Firmware and Configuration Loading Script](#Modifications-Applicable-to-Firmware-and-Configuration-Loading-Script).
 
+#### Address Specification
+All ADM1266 scripts which communicate over the PMBus accept the addresses of the
+device(s) as command line arguments.  One or more addresses may be provided,
+depending on the number of devices in system. The leading 0x may be omitted.
+
+For example:
+`python 'ADM1266 Telemetry Read.py' 40 0x62`  for devices at 0x40 and 0x62.
+
+By default if no addresses are specified, the system will use 0x40 and 0x42.
+
 ## User Specific Modifications
 
 ### Modifications Applicable to PMBus_I2C
@@ -57,24 +67,29 @@ This section covers the modifications that are applicable for all the user inter
 [ADM1266 Margin - Closed Loop.py](ADM1266_Margin_-_Closed_Loop.py)  
 [ADM1266 Margin - Open Loop.py](ADM1266_Margin_-_Open_Loop.py)  
 
-#### Step 1:
-Open the respective python script using any text editor. 
+#### Aardvark Specification
+By default the script will utilize the first un-used Aardvard detected in the 
+system.  If a specific Aardvark needs to be utilized, the device's unique ID
+needs to be added to the Open_Aardvark function call.
 
-#### Step 2:
-The unique ID, 1845957160, in the following line of the script requires to be updated with the unique ID of the dongle which is used to communicate with the ADM1266. 
+For Example:
+The unique ID, 1845957160, in the following line of the script requires to be 
+updated with the unique ID of the dongle which is used to communicate with the ADM1266. 
 `PMBus_I2C.Open_Aardvark(1845957160)`
 The unique ID of the dongle is printed on the dongle, shown in Figure 1.
-If no unique ID is provided, the first un-used Aardvark detected will be used.    
 <p>
     <img src="images/Unique_ID.png"/>
     <br>
     <em>Figure 1. Unique ID on the Dongle</em>
 </p>  
 
-#### Step 3:
-The address of the ADM1266s which are in the same system requires to be updated in the following line of the script. The addresses need be separated by commas.
+#### Default Addresses
+To change the default addresses of the scripts, modify the following line in the
+\_\_main\_\_ of each script.
+
 `ADM1266_Lib.ADM1266_Address = [0x40, 0x42]`
-The example above shows ADM1266s with PMBus address of 0x40 and 0x42. 
+
+Note: [The addresses may be passed in to the scripts via command line arguments](#address-specification)
 
 ### Modifications Applicable to Firmware and Configuration Loading Script
 This section covers the specific modifications required only for [ADM1266 Load Firmware and Configuration.py](ADM1266_Load_Firmware_and_PMBus_Configuration.py).
