@@ -576,6 +576,20 @@ Summary_Data = [0 for k in range(6)]
 Record_Index = 0
 Num_Records = 0
 
+#Define constants to ease understanding of the Signals_Data field. In reality
+#the list of Signals_Data should become a class to access individual components,
+#but this is a quick solution to get things more legible
+SIGNAL_DATA_IDX_NAME    = 0
+SIGNAL_DATA_IDX_NUM     = 1
+SIGNAL_DATA_IDX_IOTYPE  = 2
+SIGNAL_DATA_IDX_DIR     = 3
+SIGNAL_DATA_IDX_INVAL   = 4
+SIGNAL_DATA_IDX_OUTVAL  = 5
+SIGNAL_DATA_IDX_CURVAL  = 6
+IO_TYPE_GPIO  = 1
+IO_TYPE_PDIO  = 0
+
+
 
 # function to dynamically initialize nested lists to store system and blackbox data
 def Init_Lists():
@@ -780,8 +794,9 @@ def PDIO_Rail_BB_Data(data, device):
                     VP_Data[j][k][6] = temp[i]
 
         for n in range(0, 25, 1):
-            if Signals_Data[device][n][2] == 1 and Signals_Data[device][n][1] == i + 1:
-                Signals_Data[device][n][5] = temp[i]
+            if(Signals_Data[device][n][SIGNAL_DATA_IDX_IOTYPE] == IO_TYPE_PDIO and 
+               Signals_Data[device][n][SIGNAL_DATA_IDX_NUM] == i + 1):
+                Signals_Data[device][n][SIGNAL_DATA_IDX_OUTVAL] = temp[i]
 
 
 def PDIO_Signal_BB_Input_Data(data, device):
@@ -789,8 +804,9 @@ def PDIO_Signal_BB_Input_Data(data, device):
     temp.reverse()
     for i in range(0, 16, 1):
         for n in range(0, 25, 1):
-            if Signals_Data[device][n][2] == 1 and Signals_Data[device][n][1] == i + 1:
-                Signals_Data[device][n][4] = temp[i]
+            if(Signals_Data[device][n][SIGNAL_DATA_IDX_IOTYPE] == IO_TYPE_PDIO and 
+               Signals_Data[device][n][SIGNAL_DATA_IDX_NUM] == i + 1):
+                Signals_Data[device][n][SIGNAL_DATA_IDX_INVAL] = temp[i]
 
 
 def GPIO_map(data):
@@ -812,8 +828,9 @@ def GPIO_Signal_BB_Input_Data(data, device):
     temp = GPIO_map(temp)
     for i in range(0, 10, 1):
         for n in range(0, 25, 1):
-            if Signals_Data[device][n][2] == 1 and Signals_Data[device][n][1] == i + 1:
-                Signals_Data[device][n][4] = temp[i]
+            if(Signals_Data[device][n][SIGNAL_DATA_IDX_IOTYPE] == IO_TYPE_GPIO and
+               Signals_Data[device][n][SIGNAL_DATA_IDX_NUM] == i + 1):
+                Signals_Data[device][n][SIGNAL_DATA_IDX_INVAL] = temp[i]
 
 
 def GPIO_Signal_BB_Output_Data(data, device):
@@ -822,26 +839,27 @@ def GPIO_Signal_BB_Output_Data(data, device):
     temp = GPIO_map(temp)
     for i in range(0, 10, 1):
         for n in range(0, 25, 1):
-            if Signals_Data[device][n][2] == 1 and Signals_Data[device][n][1] == i + 1:
-                Signals_Data[device][n][5] = temp[i]
+            if(Signals_Data[device][n][SIGNAL_DATA_IDX_IOTYPE] == IO_TYPE_GPIO and 
+               Signals_Data[device][n][SIGNAL_DATA_IDX_NUM] == i + 1):
+                Signals_Data[device][n][SIGNAL_DATA_IDX_OUTVAL] = temp[i]
 
 
 def Signals_Status_Fill():
     del Signals_Status[:]
     for i in range(len(ADM1266_Address)):
         for j in range(0, 25, 1):
-            if Signals_Data[i][j][0] != 0:
-                if Signals_Data[i][j][4] == 1:
+            if Signals_Data[i][j][SIGNAL_DATA_IDX_NAME] != 0:
+                if Signals_Data[i][j][SIGNAL_DATA_IDX_INVAL] == 1:
                     i_val = "High"
                 else:
                     i_val = "Low"
 
-                if Signals_Data[i][j][5] == 1:
+                if Signals_Data[i][j][SIGNAL_DATA_IDX_OUTVAL] == 1:
                     o_val = "High"
                 else:
                     o_val = "Low"
                 Signals_Status.append(
-                    str(Signals_Data[i][j][0]) + " - Input Value : " + i_val + " - Output Value : " + o_val)
+                    str(Signals_Data[i][j][SIGNAL_DATA_IDX_NAME]) + " - Input Value : " + i_val + " - Output Value : " + o_val)
 
 
 def Rails_Status():
@@ -979,10 +997,10 @@ def Signal_Parse(SignalData_length, SignalData_pointer):
         (temp, next_pointer) = VLQ_Decode(next_pointer)
         Signal_Direction = temp
 
-        Signals_Data[PDIO_GPIO_dev_id][i][0] = Signal_Name
-        Signals_Data[PDIO_GPIO_dev_id][i][1] = PDIO_GPIO_Num
-        Signals_Data[PDIO_GPIO_dev_id][i][2] = PDIO_GPIO_Type
-        Signals_Data[PDIO_GPIO_dev_id][i][3] = Signal_Direction
+        Signals_Data[PDIO_GPIO_dev_id][i][SIGNAL_DATA_IDX_NAME] = Signal_Name
+        Signals_Data[PDIO_GPIO_dev_id][i][SIGNAL_DATA_IDX_NUM] = PDIO_GPIO_Num
+        Signals_Data[PDIO_GPIO_dev_id][i][SIGNAL_DATA_IDX_IOTYPE] = PDIO_GPIO_Type
+        Signals_Data[PDIO_GPIO_dev_id][i][SIGNAL_DATA_IDX_DIR] = Signal_Direction
 
         i += 1
 
@@ -1065,8 +1083,9 @@ def PDIO_Rail_Inst_Data(data, device):
                     VP_Data[j][k][14] = temp[i]
 
         for n in range(0, 25, 1):
-            if Signals_Data[device][n][2] == 0 and Signals_Data[device][n][1] == i + 1:
-                Signals_Data[device][n][6] = temp[i]
+            if(Signals_Data[device][n][SIGNAL_DATA_IDX_IOTYPE] == IO_TYPE_PDIO and 
+               Signals_Data[device][n][SIGNAL_DATA_IDX_NUM] == i + 1):
+                Signals_Data[device][n][SIGNAL_DATA_IDX_CURVAL] = temp[i]
 
 
 def GPIO_Signal_Inst_Data(data, device):
@@ -1075,8 +1094,9 @@ def GPIO_Signal_Inst_Data(data, device):
     temp = GPIO_map(temp)
     for i in range(0, 10, 1):
         for n in range(0, 25, 1):
-            if Signals_Data[device][n][2] == 1 and Signals_Data[device][n][1] == i + 1:
-                Signals_Data[device][n][6] = temp[i]
+            if(Signals_Data[device][n][SIGNAL_DATA_IDX_IOTYPE] == IO_TYPE_GPIO and 
+               Signals_Data[device][n][SIGNAL_DATA_IDX_NUM] == i + 1):
+                Signals_Data[device][n][SIGNAL_DATA_IDX_CURVAL] = temp[i]
 
 
 def Get_Rail_Current_Data(address, page):
@@ -1134,10 +1154,11 @@ def Get_Signal_Current_Data(address, index):
         PDIO_Rail_Inst_Data(read_data, address)
         index = index + 1
         for n in range(0, 25, 1):
-            if Signals_Data[address][n][2] == 0 and Signals_Data[address][n][1] == (index) and Signals_Data[address][n][
-                0] != 0:
-                status = Signals_Data[address][n][6]
-                name = Signals_Data[address][n][0]
+            if(Signals_Data[address][n][SIGNAL_DATA_IDX_IOTYPE] == IO_TYPE_PDIO and 
+               Signals_Data[address][n][SIGNAL_DATA_IDX_NUM] == (index) and 
+               Signals_Data[address][n][SIGNAL_DATA_IDX_NAME] != 0):
+                status = Signals_Data[address][n][SIGNAL_DATA_IDX_CURVAL]
+                name = Signals_Data[address][n][SIGNAL_DATA_IDX_NAME]
         if name == 0:
             temp = [int(x) for x in bin(read_data[1] + (256 * read_data[2]))[2:].zfill(16)]
             temp.reverse()
@@ -1148,10 +1169,11 @@ def Get_Signal_Current_Data(address, index):
         GPIO_Signal_Inst_Data(read_data, address)
         index = index - 15
         for n in range(0, 25, 1):
-            if Signals_Data[address][n][2] == 1 and Signals_Data[address][n][1] == (index) and Signals_Data[address][n][
-                0] != 0:
-                status = Signals_Data[address][n][6]
-                name = Signals_Data[address][n][0]
+            if(Signals_Data[address][n][SIGNAL_DATA_IDX_IOTYPE] == IO_TYPE_GPIO and 
+               Signals_Data[address][n][SIGNAL_DATA_IDX_NUM] == (index) and 
+               Signals_Data[address][n][SIGNAL_DATA_IDX_NAME] != 0):
+                status = Signals_Data[address][n][SIGNAL_DATA_IDX_CURVAL]
+                name = Signals_Data[address][n][SIGNAL_DATA_IDX_NAME]
         if name == 0:
             temp = [int(x) for x in bin(read_data[1] + (256 * read_data[2]))[2:].zfill(16)]
             temp.reverse()
@@ -1328,12 +1350,12 @@ def Signals_I_Status_Fill():
     del Signals_I_Status[:]
     for i in range(len(ADM1266_Address)):
         for j in range(0, 25, 1):
-            if Signals_Data[i][j][0] != 0:
-                if Signals_Data[i][j][6] == 1:
+            if Signals_Data[i][j][SIGNAL_DATA_IDX_NAME] != 0:
+                if Signals_Data[i][j][SIGNAL_DATA_IDX_CURVAL] == 1:
                     i_val = "High"
                 else:
                     i_val = "Low"
-                Signals_I_Status.append(str(Signals_Data[i][j][0]) + " - Value : " + i_val)
+                Signals_I_Status.append(str(Signals_Data[i][j][SIGNAL_DATA_IDX_NAME]) + " - Value : " + i_val)
 
 
 # offline blackbox
