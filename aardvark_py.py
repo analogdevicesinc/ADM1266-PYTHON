@@ -1,7 +1,7 @@
 #==========================================================================
 # Aardvark Interface Library
 #--------------------------------------------------------------------------
-# Copyright (c) 2002-2008 Total Phase, Inc.
+# Copyright (c) 2002-2022 Total Phase, Inc.
 # All rights reserved.
 # www.totalphase.com
 #
@@ -36,49 +36,74 @@
 # To access Aardvark devices through the API:
 #
 # 1) Use one of the following shared objects:
-#      aardvark.so      --  Linux shared object
-#      aardvark.dll     --  Windows dynamic link library
+#      aardvark.so       --  Linux shared object
+#      aardvark.dll      --  Windows dynamic link library
 #
 # 2) Along with one of the following language modules:
-#      aardvark.c/h     --  C/C++ API header file and interface module
-#      aardvark_py.py   --  Python API
-#      aardvark.bas     --  Visual Basic 6 API
-#      aardvark.cs      --  C# .NET source
-#      aardvark_net.dll --  Compiled .NET binding
+#      aardvark.c/h      --  C/C++ API header file and interface module
+#      aardvark_py.py    --  Python API
+#      aardvark.bas      --  Visual Basic 6 API
+#      aardvark.cs       --  C# .NET source
+#      aardvark_net.dll  --  Compiled .NET binding
 #==========================================================================
 
 
 #==========================================================================
 # VERSION
 #==========================================================================
-AA_API_VERSION    = 0x050a   # v5.10
+AA_API_VERSION    = 0x0546   # v5.70
 AA_REQ_SW_VERSION = 0x050a   # v5.10
 
+
+#==========================================================================
+# IMPORTS
+#==========================================================================
 import os
+import struct
 import sys
+
+from array import array, ArrayType
+
+def import_library ():
+    global api
+
+    import platform
+    ext = platform.system() == 'Windows' and '.dll' or '.so'
+    dir = os.path.dirname(os.path.abspath(__file__))
+    lib = os.path.join(dir, 'aardvark' + ext)
+
+    try:
+        if sys.version_info >= (3, 5):
+            from importlib.machinery import ExtensionFileLoader
+            from importlib.util import spec_from_file_location
+            from importlib.util import module_from_spec
+
+            loader = ExtensionFileLoader('aardvark', lib)
+            spec = spec_from_file_location('aardvark', loader=loader)
+            api = module_from_spec(spec)
+            spec.loader.exec_module(api)
+
+        else:
+            import imp
+            api = imp.load_dynamic('aardvark', lib)
+
+    except:
+        _, err, _ = sys.exc_info()
+        msg = 'Error while importing aardvark%s:\n%s' % (ext, err)
+        sys.exit(msg)
+
 try:
     import aardvark as api
 except ImportError:
-    _, ex1, _ = sys.exc_info()
-    import imp, platform
-    ext = platform.system() in ('Windows', 'Microsoft') and '.dll' or '.so'
-    try:
-        api = imp.load_dynamic('aardvark', 'aardvark' + ext)
-    except ImportError:
-        _, ex2, _ = sys.exc_info()
-        import_err_msg  = 'Error importing aardvark%s\n' % ext
-        import_err_msg += '  Architecture of aardvark%s may be wrong\n' % ext
-        import_err_msg += '%s\n%s' % (ex1, ex2)
-        raise ImportError(import_err_msg)
+    import_library()
+
+del import_library
 
 AA_SW_VERSION      = api.py_version() & 0xffff
 AA_REQ_API_VERSION = (api.py_version() >> 16) & 0xffff
 AA_LIBRARY_LOADED  = \
     ((AA_SW_VERSION >= AA_REQ_SW_VERSION) and \
      (AA_API_VERSION >= AA_REQ_API_VERSION))
-
-from array import array, ArrayType
-import struct
 
 
 #==========================================================================
