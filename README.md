@@ -17,6 +17,7 @@ ADM1266 user interfacing scripts to load firmware, access Blackbox, perform marg
     c. [ADM1266 Blackbox Read.py](ADM1266_Blackbox_Read.py)  
     d. [ADM1266 Margin - Closed Loop.py](ADM1266_Margin_-_Closed_Loop.py)  
     e. [ADM1266 Margin - Open Loop.py](ADM1266_Margin_-_Open_Loop.py)  
+    f. [ADM1266 PVID.py](ADM1266_PVID.py)
 
 
 ## Description of the Modules
@@ -56,8 +57,8 @@ This section covers the modifications that are applicable for all the user inter
 [ADM1266 Blackbox Read.py](ADM1266_Blackbox_Read.py)  
 [ADM1266 Margin - Closed Loop.py](ADM1266_Margin_-_Closed_Loop.py)  
 [ADM1266 Margin - Open Loop.py](ADM1266_Margin_-_Open_Loop.py)  
+[ADM1266 PVID.py](ADM1266_PVID.py)
 
-#### Step 1:
 Open the respective python script using any text editor. 
 
 #### Step 2:
@@ -279,3 +280,75 @@ This function is used to parse the raw voltage telemetry data and fill it in the
 •	`ADM1266_Lib.Signals_I_Status_Fill()`
 This function is used to parse the raw voltage telemetry data and fill it in the following lists
     - ADM1266_Lib.Signals_I_Status: List of all the Signals along with their output and input values
+
+
+### ADM1266 PVID Script
+Functions used from [ADM1266 PVID.py](ADM1266_PVID.py):
+
+•	`ADM1266_Lib.set_page(channel_value)`
+This function sets the page value for the ADM1266. It takes channel_value as an input, which corresponds to the desired channel.
+
+•	`ADM1266_Lib.(pvid_config_command(rail, gpio_numbs)`
+This function generates the PVID configuraiton command with informations received from the user. It uses the rail and gpio_numbs parameters to construct the command.
+
+•	`ADM1266_Lib.pvid_mode_command(rail)`
+This function creates the PVID mode command with informations received from the user. It uses the rail parameter to construct the command.
+
+•	`ADM1266_Lib.get_VOUT_MODE()`
+This function is used to readback the VOUT_MODE register of ADM1266. 
+
+•	`ADM1266_Lib.twosCom_decBin(dec, digit)`
+This function converts a decimal value (dec) to its two's complement binary representation with a specified number of digits (digit)
+
+•	`ADM1266_Lib.twosCom_binDec(bin, digit)`
+This function converts a two's complement binary string (bin) to its decimal equivalent with a specified number of digits (digit).
+
+Navigate to the directory where [ADM1266 PVID.py](ADM1266_PVID.py) is located. 
+In the command prompt type python “ADM1266 PVID.py” to run the script.
+
+<p>
+    <img src="images/ADM1266_PVID_run.jpeg"/>
+    <br>
+    <em>Figure 8: Command to Run the Python Script</em>
+</p>  
+
+
+Enter the channel name( 1 or 2). If you want to use 2 channels first configure channel 1 after channel 2.
+Enter the device address. You can find your device address from ADI Power Studio
+I set the DAC1 so channel name is VP1. 
+
+<p>
+    <img src="images/ADM1266_PVID_rail_setting.jpeg"/>
+    <br>
+    <em>Figure 9: PVID rail setting step</em>
+</p> 
+
+
+Choose the index of GPIO pins 
+Enter the resolution
+
+<p>
+    <img src="images/ADM1266_PVID_configuration.jpeg"/>
+    <br>
+    <em>Figure 10: PVID configuration step</em>
+</p> 
+
+
+After PVID configured, If you want to enable PVID you can answer the question as “yes”. 
+
+<p>
+    <img src="images/ADM1266_PVID_mode.jpeg"/>
+    <br>
+    <em>Figure 11: Enable PVID step</em>
+</p> 
+
+
+If you want to add another channel or reconfigure channel you can answer this question as “yes”.
+If you want to use also channel 2 , you have to set another rail using ADI Power Studio
+
+<p>
+    <img src="images/ADM1266_PVID_adding_channel.jpeg"/>
+    <br>
+    <em>Figure 12: Adding another PVID channel step </em>
+</p> 
+
