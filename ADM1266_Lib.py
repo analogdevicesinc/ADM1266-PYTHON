@@ -103,7 +103,7 @@ def program_firmware_hex(device_address, file, unlock_part):
     if bootloadVer != array('B', [0, 0, 0]):
         if unlock_part:
             unlock(device_address)
-            assert islocked(device_address) == False, 'device @0x{0:02X} should be unlocked!'.format(i2c_address)
+            assert islocked(device_address) == False, 'device @0x{0:02X} should be unlocked!'.format(0x50)
         jump_to_iap(device_address)
 
     hex = open(file, "rb")
@@ -1426,3 +1426,70 @@ def Get_Raw_Data_Offline(bb_data_list, record_number):
 
     for i in range(len(ADM1266_Address)):
         BB_Data[i] = bb_data_list[64*(j):64*(j+1)]
+        
+        
+def set_page(channel_value):
+    write_command = [0x00, channel_value]
+    PMBus_I2C.PMBus_Write(0x50, write_command)
+    delay(600)
+
+
+def pvid_config_command(rail, gpio_numbs):
+    pvid_cfg_cmd = [0xF2, 7, rail["PVID_CH_NAME"]]
+    for i in range(rail["PVID_PIN_COUNT"]):
+        pvid_cfg_cmd.append(gpio_numbs[i])
+        
+    while len(pvid_cfg_cmd) < 7:
+        pvid_cfg_cmd.append(15)
+    
+    exponent = rail["PVID_RESOLUTION_EXPONENT"]
+    resolution = int(rail["PVID_RESOLUTION"] / (2 ** exponent))
+    pvid_cfg_cmd.append(resolution & 0xFF)
+    pvid_cfg_cmd.append((resolution >> 8) & 0xFF)
+    #print('pvid_cfg_cmd', pvid_cfg_cmd)
+    
+    PMBus_I2C.PMBus_Write(0x50, pvid_cfg_cmd)
+    delay(600)
+    result_cfg = PMBus_I2C.PMBus_Write_Read(0x50, [0xF2], 16)
+    delay(600)
+    #print('result_cfg', result_cfg)
+    return result_cfg
+    
+    
+def pvid_mode_command(rail):
+    pvid_mode_cmd = [0xF3, 2, rail["PVID_CH_NAME"]]
+    rail["PVID_ENABLE"]  = 1 if rail["PVID_ENABLE"] == 'yes' else 0
+    pvid_mode_cmd.append(rail["PVID_ENABLE"])
+    PMBus_I2C.PMBus_Write(0x50, pvid_mode_cmd)
+    delay(600)
+    result_cmd = PMBus_I2C.PMBus_Write_Read(0x50, [0xF3], 3)
+    delay(600)
+    return result_cmd
+    
+  
+def get_VOUT_MODE():
+    write_command = [0x20]
+    vout_mode = PMBus_I2C.PMBus_Write_Read(0x50, write_command, 1)
+    delay(600)
+    return vout_mode
+
+
+def twosCom_decBin(dec, digit):
+    if dec>=0:
+        bin1 = bin(dec).split("0b")[1]
+        while len(bin1)<digit :
+                bin1 = '0'+bin1
+        return bin1
+    else:
+        bin1 = -1*dec
+        return bin(dec-pow(2,digit)).split("0b")[1]
+    
+    
+def twosCom_binDec(bin, digit):
+    while len(bin)<digit :
+        bin = '0'+bin
+    if bin[0] == '0':
+        return int(bin, 2)
+    else:
+        return -1 * (int(''.join('1' if x == '0' else '0' for x in bin), 2) + 1)
+    
